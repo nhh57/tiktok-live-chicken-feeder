@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Arduino
+*.hex
+*.elf
+*.bin
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Libraries (keep only references, not files)
+lib/*.zip
+lib/*.h
+
+# Temp files
+*.tmp
+*.bak
+
+# Credentials (if any config files with passwords)
+credentials.json
+secrets.json
+
+# Node modules (if using Node.js)
+node_modules/
