@@ -83,6 +83,7 @@
 
 // ==================== Web UI Colors (CSS) ====================
 #define COLOR_PRIMARY "#667eea"
+#define COLOR_SECONDARY "#764ba2"
 #define COLOR_SUCCESS "#10b981"
 #define COLOR_WARNING "#f59e0b"
 #define COLOR_DANGER "#ef4444"

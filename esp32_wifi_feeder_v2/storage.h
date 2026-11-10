@@ -32,6 +32,7 @@ bool saveWiFiCredentials(String ssid, String password);
 bool loadWiFiCredentials(String &ssid, String &password);
 bool saveAdminCredentials(String username, String passwordHash);
 bool loadAdminCredentials(String &username, String &passwordHash);
+bool verifyAdminCredentials(String username, String password);
 bool saveAPPassword(String password);
 String loadAPPassword();
 void updateStats(String motor);
@@ -164,6 +165,34 @@ bool loadAdminCredentials(String &username, String &passwordHash) {
   }
   
   DEBUG_PRINTF("Admin credentials loaded: username='%s'\n", username.c_str());
+  return true;
+}
+
+/**
+ * Verify admin credentials
+ * @param username Username to verify
+ * @param password Plain text password to verify
+ * @return true if credentials match
+ */
+bool verifyAdminCredentials(String username, String password) {
+  String storedUsername, storedPasswordHash;
+  
+  if (!loadAdminCredentials(storedUsername, storedPasswordHash)) {
+    return false;
+  }
+  
+  // Compare username (case sensitive)
+  if (username != storedUsername) {
+    return false;
+  }
+  
+  // Hash provided password and compare
+  String providedPasswordHash = hashPassword(password);
+  
+  if (providedPasswordHash != storedPasswordHash) {
+    return false;
+  }
+  
   return true;
 }
 
