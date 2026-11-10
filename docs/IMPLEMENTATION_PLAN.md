@@ -26,10 +26,10 @@ Nâng cấp ESP32 chicken feeder từ hardcoded WiFi sang hệ thống tự đ�
 | Phase | Tasks | Completed | Progress |
 |-------|-------|-----------|----------|
 | Phase 1: Foundation | 3 | 3 | ██████████ 100% |
-| Phase 2: Setup Portal | 2 | 0 | ░░░░░░░░░░ 0% |
+| Phase 2: Setup Portal | 2 | 1 | █████░░░░░ 50% |
 | Phase 3: Admin Panel | 3 | 0 | ░░░░░░░░░░ 0% |
 | Phase 4: Integration | 2 | 0 | ░░░░░░░░░░ 0% |
-| **TOTAL** | **10** | **3** | ███░░░░░░░ **30%** |
+| **TOTAL** | **10** | **4** | ████░░░░░░ **40%** |
 
 **Estimated Total Time:** ~17 hours  
 **Actual Time Spent:** In progress...

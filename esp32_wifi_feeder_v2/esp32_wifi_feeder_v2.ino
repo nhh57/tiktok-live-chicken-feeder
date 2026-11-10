@@ -35,13 +35,14 @@
 #include "storage.h"            // Task 2 - Completed
 #include "wifi_manager.h"       // Task 3 - Completed
 // #include "auth.h"            // Task 5 - Not implemented yet
-// #include "web_setup.h"       // Task 4 - Not implemented yet
+#include "web_setup.h"          // Task 4 - Completed
 // #include "web_admin.h"       // Task 6 - Not implemented yet
 #include "motor_control.h"      // Task 1 - Completed
 
 // ==================== Global Objects ====================
 WebServer server(HTTP_PORT);
 Preferences preferences;
+DNSServer dnsServer;            // For captive portal
 
 // ==================== Global Variables ====================
 // System info
@@ -63,29 +64,21 @@ void setup() {
   // Task 2 - Initialize storage (Preferences)
   initStorage();
   
-  // ==================== TEMPORARY: Auto-save WiFi for testing ====================
-  // TODO: Remove this after Task 4 (Setup Portal) is completed
-  // This automatically saves WiFi credentials for testing
-  String ssid, password;
-  if (!loadWiFiCredentials(ssid, password)) {
-    DEBUG_PRINTLN(">>> TEMPORARY: Auto-saving WiFi credentials for testing");
-    saveWiFiCredentials("Hoang Hai's iPhone", "Abcd@1234");
-    setSetupDone(true);
-    DEBUG_PRINTLN(">>> WiFi credentials saved. Restarting to connect...");
-    delay(2000);
-    ESP.restart(); // Restart to trigger WiFi connection
-  }
-  // ==================== END TEMPORARY CODE ====================
-  
   // Task 3 - Initialize WiFi Manager
   // This will either connect to saved WiFi or start AP mode
   initWiFiManager();
   
-  // TODO: Task 4 - Setup HTTP server routes
-  // setupServerRoutes();
+  // Task 4 - Setup HTTP server routes
+  setupServerRoutes();
+  
+  // If in AP mode, start captive portal (DNS server)
+  if (getWiFiState() == WIFI_AP_MODE) {
+    dnsServer.start(53, "*", WiFi.softAPIP());
+    DEBUG_PRINTLN("DNS Server started for captive portal");
+  }
   
   // TEMPORARY: Basic routes for testing
-  setupBasicRoutes();
+  //setupBasicRoutes();
   
   // Start HTTP server
   server.begin();
@@ -102,6 +95,11 @@ void setup() {
 void loop() {
   // Task 3 - WiFi connection monitoring and auto-reconnect
   checkWiFiConnection();
+  
+  // Task 4 - Handle DNS requests for captive portal
+  if (getWiFiState() == WIFI_AP_MODE) {
+    dnsServer.processNextRequest();
+  }
   
   // Handle HTTP requests
   server.handleClient();
@@ -164,31 +162,45 @@ void printFooter() {
   Serial.println("========================================\n");
 }
 
-// ==================== Temporary HTTP Routes (Remove after Task 4/6) ====================
+// ==================== HTTP Routes Setup ====================
 
 /**
- * TEMPORARY: Setup basic HTTP routes for testing
- * This will be replaced by proper routes in Tasks 4 and 6
+ * Setup all HTTP server routes
+ * Routes differ based on WiFi state (AP mode vs Connected mode)
  */
-void setupBasicRoutes() {
-  // GET / - Home page
-  server.on("/", HTTP_GET, handleRoot);
+void setupServerRoutes() {
+  DEBUG_PRINTLN("Setting up HTTP routes...");
   
-  // POST /feed - Motor control
-  server.on("/feed", HTTP_POST, handleFeed);
-  
-  // GET /status - Status
+  // Common routes (available in all modes)
   server.on("/status", HTTP_GET, handleStatus);
-  
-  // POST /stop - Emergency stop
+  server.on("/feed", HTTP_POST, handleFeed);
   server.on("/stop", HTTP_POST, handleStop);
+  
+  // Setup portal routes (for AP mode, but accessible anytime)
+  setupSetupPortalRoutes();
+  
+  // Root route - different behavior based on WiFi state
+  server.on("/", HTTP_GET, []() {
+    if (getWiFiState() == WIFI_AP_MODE) {
+      // In AP mode: show setup portal
+      handleSetupRoot();
+    } else {
+      // In connected mode: show normal home page
+      handleRoot();
+    }
+  });
   
   // 404 handler
   server.onNotFound(handle404);
+  
+  DEBUG_PRINTLN("HTTP routes configured");
 }
+
+// ==================== HTTP Route Handlers ====================
 
 /**
  * Handle GET /
+ * Normal home page (when connected to WiFi)
  */
 void handleRoot() {
   String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
