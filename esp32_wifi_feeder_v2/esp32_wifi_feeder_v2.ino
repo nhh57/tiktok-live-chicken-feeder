@@ -36,7 +36,7 @@
 #include "wifi_manager.h"       // Task 3 - Completed
 // Authentication removed - not needed for local IoT device
 #include "web_setup.h"          // Task 4 - Completed
-// #include "web_admin.h"       // Task 6 - Not implemented yet
+#include "web_admin.h"          // Task 6 - Completed
 #include "motor_control.h"      // Task 1 - Completed
 
 // ==================== Global Objects ====================
@@ -179,8 +179,8 @@ void setupServerRoutes() {
   // Setup portal routes (for AP mode, but accessible anytime)
   setupSetupPortalRoutes();
   
-  // Admin routes (no authentication needed)
-  server.on("/admin", HTTP_GET, handleAdmin);
+  // Task 6 - Setup admin panel routes
+  setupAdminRoutes(server);
   
   // Root route - different behavior based on WiFi state
   server.on("/", HTTP_GET, []() {
@@ -231,7 +231,7 @@ void handleRoot() {
   html += "<li>POST /feed - Feed control</li>";
   html += "<li>GET /status - Get motor status</li>";
   html += "<li>POST /stop - Emergency stop</li>";
-  html += "<li><a href='/login' style='color: " + String(COLOR_PRIMARY) + "; text-decoration: none; font-weight: bold;'>Admin Panel →</a></li>";
+  html += "<li><a href='/admin' style='color: " + String(COLOR_PRIMARY) + "; text-decoration: none; font-weight: bold;'>🔧 Admin Panel →</a></li>";
   html += "</ul>";
   html += "<h3>Example POST /feed:</h3>";
   html += "<pre>{\"motor\": \"cam\", \"duration\": 1500}</pre>";
@@ -240,100 +240,6 @@ void handleRoot() {
   html += "<div class='card'>";
   html += "<p><em>⚠️ Development Mode - WiFi Manager and Admin Panel coming soon...</em></p>";
   html += "</div>";
-  html += "</body></html>";
-  
-  server.send(200, "text/html; charset=UTF-8", html);
-}
-
-/**
- * Handle GET /admin
- * Admin dashboard (direct access, no authentication)
- */
-void handleAdmin() {
-  String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
-  html += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
-  html += "<title>Admin - ChickenFeeder</title>";
-  html += "<style>";
-  html += "* { margin: 0; padding: 0; box-sizing: border-box; }";
-  html += "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }";
-  html += ".header { background: linear-gradient(135deg, " + String(COLOR_PRIMARY) + ", " + String(COLOR_SECONDARY) + "); color: white; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }";
-  html += ".container { max-width: 1200px; margin: 0 auto; padding: 20px; }";
-  html += "h1 { font-size: 24px; }";
-  html += ".subtitle { opacity: 0.9; margin-top: 5px; font-size: 14px; }";
-  html += ".card { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }";
-  html += ".stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }";
-  html += ".stat-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }";
-  html += ".stat-value { font-size: 32px; font-weight: bold; color: " + String(COLOR_PRIMARY) + "; }";
-  html += ".stat-label { color: #666; margin-top: 5px; font-size: 14px; }";
-  html += ".btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s; text-decoration: none; display: inline-block; }";
-  html += ".btn-primary { background: " + String(COLOR_PRIMARY) + "; color: white; }";
-  html += ".btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }";
-  html += ".btn-danger { background: " + String(COLOR_DANGER) + "; color: white; }";
-  html += ".info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }";
-  html += ".info-row:last-child { border-bottom: none; }";
-  html += ".info-label { font-weight: 600; color: #333; }";
-  html += ".info-value { color: #666; }";
-  html += "</style>";
-  html += "</head><body>";
-  
-  // Header
-  html += "<div class='header'>";
-  html += "<div class='container'>";
-  html += "<h1>🐔 ChickenFeeder Admin Panel</h1>";
-  html += "<div class='subtitle'>Quản lý hệ thống cho gà ăn tự động</div>";
-  html += "</div></div>";
-  
-  html += "<div class='container'>";
-  
-  // Statistics
-  uint32_t cam, ngo, thoc;
-  getStats(cam, ngo, thoc);
-  
-  html += "<div class='stats'>";
-  html += "<div class='stat-box'>";
-  html += "<div class='stat-value'>" + String(cam) + "</div>";
-  html += "<div class='stat-label'>🌾 Cám</div>";
-  html += "</div>";
-  html += "<div class='stat-box'>";
-  html += "<div class='stat-value'>" + String(ngo) + "</div>";
-  html += "<div class='stat-label'>🌽 Ngô</div>";
-  html += "</div>";
-  html += "<div class='stat-box'>";
-  html += "<div class='stat-value'>" + String(thoc) + "</div>";
-  html += "<div class='stat-label'>🌾 Thóc</div>";
-  html += "</div>";
-  html += "<div class='stat-box'>";
-  html += "<div class='stat-value'>" + String(cam + ngo + thoc) + "</div>";
-  html += "<div class='stat-label'>📊 Tổng</div>";
-  html += "</div>";
-  html += "</div>";
-  
-  // Device Info
-  html += "<div class='card'>";
-  html += "<h2>ℹ️ Thông tin thiết bị</h2>";
-  html += "<div class='info-row'><div class='info-label'>Tên thiết bị</div><div class='info-value'>" + loadDeviceName() + "</div></div>";
-  html += "<div class='info-row'><div class='info-label'>Firmware</div><div class='info-value'>" + String(FIRMWARE_VERSION) + "</div></div>";
-  html += "<div class='info-row'><div class='info-label'>IP Address</div><div class='info-value'>" + WiFi.localIP().toString() + "</div></div>";
-  html += "<div class='info-row'><div class='info-label'>WiFi SSID</div><div class='info-value'>" + WiFi.SSID() + "</div></div>";
-  html += "<div class='info-row'><div class='info-label'>Signal</div><div class='info-value'>" + String(WiFi.RSSI()) + " dBm</div></div>";
-  html += "<div class='info-row'><div class='info-label'>Uptime</div><div class='info-value'>" + String((millis() - bootTime) / 1000) + " seconds</div></div>";
-  html += "<div class='info-row'><div class='info-label'>Free Memory</div><div class='info-value'>" + String(ESP.getFreeHeap()) + " bytes</div></div>";
-  html += "</div>";
-  
-  // Quick Actions
-  html += "<div class='card'>";
-  html += "<h2>⚡ Thao tác nhanh</h2>";
-  html += "<p style='margin-bottom: 15px;'>Đang phát triển Task 6... Sẽ có các tính năng:</p>";
-  html += "<ul style='margin-left: 20px; margin-bottom: 15px;'>";
-  html += "<li>Điều khiển motors thủ công</li>";
-  html += "<li>Cài đặt WiFi</li>";
-  html += "<li>Xem logs</li>";
-  html += "<li>Reset thống kê</li>";
-  html += "</ul>";
-  html += "<a href='/' class='btn btn-primary'>← Quay về trang chủ</a>";
-  html += "</div>";
-  
-  html += "</div>"; // container
   html += "</body></html>";
   
   server.send(200, "text/html; charset=UTF-8", html);
