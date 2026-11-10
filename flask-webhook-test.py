@@ -117,9 +117,10 @@ def receive_gift():
     user = request.args.get('user', 'Ẩn danh')
     coins = request.args.get('coins', '1')
 
-    # ÉP KIỂU VÀ ĐỌC BIẾN REPEATCOUNT (KHẮC PHỤC LỖI FIX CỨNG 1 LẦN)
+    # ÉP KIỂU VÀ ĐỌC BIẾN REPEATCOUNT/GIFTCOUNT
+    # TikFinity dùng 'giftCount', Streamer.bot dùng 'repeatCount'
     try:
-        repeat_count = int(request.args.get('repeatCount', 1))
+        repeat_count = int(request.args.get('repeatCount') or request.args.get('giftCount') or 1)
     except ValueError:
         repeat_count = 1
 
