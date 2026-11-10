@@ -32,8 +32,8 @@
 
 // ==================== Project Headers ====================
 #include "config.h"
-// #include "storage.h"         // Task 2 - Not implemented yet
-// #include "wifi_manager.h"    // Task 3 - Not implemented yet
+#include "storage.h"            // Task 2 - Completed
+#include "wifi_manager.h"       // Task 3 - Completed
 // #include "auth.h"            // Task 5 - Not implemented yet
 // #include "web_setup.h"       // Task 4 - Not implemented yet
 // #include "web_admin.h"       // Task 6 - Not implemented yet
@@ -44,11 +44,6 @@ WebServer server(HTTP_PORT);
 Preferences preferences;
 
 // ==================== Global Variables ====================
-// WiFi state
-bool wifiConnected = false;
-bool apMode = false;
-unsigned long lastReconnectAttempt = 0;
-
 // System info
 unsigned long bootTime = 0;
 String deviceMAC = "";
@@ -65,16 +60,12 @@ void setup() {
   // Initialize hardware
   initializeHardware();
   
-  // TODO: Task 2 - Initialize storage (Preferences)
-  // initStorage();
+  // Task 2 - Initialize storage (Preferences)
+  initStorage();
   
-  // TODO: Task 3 - Initialize WiFi Manager
-  // WiFi manager will check for saved credentials
-  // If found: connect to WiFi
-  // If not found: start AP mode
-  
-  // TEMPORARY: Hardcoded WiFi for testing (remove after Task 3)
-  connectToWiFiTemp();
+  // Task 3 - Initialize WiFi Manager
+  // This will either connect to saved WiFi or start AP mode
+  initWiFiManager();
   
   // TODO: Task 4 - Setup HTTP server routes
   // setupServerRoutes();
@@ -95,8 +86,8 @@ void setup() {
 
 // ==================== Main Loop ====================
 void loop() {
-  // TODO: Task 3 - WiFi connection monitoring
-  // checkWiFiConnection();
+  // Task 3 - WiFi connection monitoring and auto-reconnect
+  checkWiFiConnection();
   
   // Handle HTTP requests
   server.handleClient();
@@ -153,42 +144,6 @@ void printFooter() {
   Serial.println("\n========================================");
   Serial.println("System Ready!");
   Serial.println("========================================\n");
-}
-
-// ==================== Temporary WiFi Connection (Remove after Task 3) ====================
-
-/**
- * TEMPORARY: Connect to hardcoded WiFi
- * This will be replaced by WiFi Manager in Task 3
- */
-void connectToWiFiTemp() {
-  const char* ssid = "Hoang Hai's iPhone";
-  const char* password = "Abcd@1234";
-  
-  DEBUG_PRINTF("Connecting to WiFi: %s\n", ssid);
-  
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    delay(500);
-    Serial.print(".");
-    digitalWrite(LED_STATUS, !digitalRead(LED_STATUS)); // Blink LED
-    attempts++;
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\nWiFi connected!");
-    Serial.printf("IP Address: %s\n", WiFi.localIP().toString().c_str());
-    Serial.printf("Signal Strength: %d dBm\n", WiFi.RSSI());
-    wifiConnected = true;
-    digitalWrite(LED_STATUS, HIGH); // Solid ON
-  } else {
-    Serial.println("\nFailed to connect to WiFi!");
-    wifiConnected = false;
-    digitalWrite(LED_STATUS, LOW);
-  }
 }
 
 // ==================== Temporary HTTP Routes (Remove after Task 4/6) ====================
@@ -288,8 +243,8 @@ void handleFeed() {
     String motorName = doc["motor"].as<String>();
     
     if (activateMotor(motorName, duration)) {
-      // TODO: Task 9 - Update statistics
-      // updateStats(motorName);
+      // Task 9 - Update statistics
+      updateStats(motorName);
       
       sendJSONResponse(200, true, "Motor " + motorName + " activated for " + String(duration) + "ms");
     } else {
@@ -312,8 +267,8 @@ void handleFeed() {
         if (activatedMotors.length() > 0) activatedMotors += ", ";
         activatedMotors += motorName;
         
-        // TODO: Task 9 - Update statistics
-        // updateStats(motorName);
+        // Task 9 - Update statistics
+        updateStats(motorName);
       }
     }
 
@@ -334,13 +289,32 @@ void handleFeed() {
 void handleStatus() {
   StaticJsonDocument<512> doc;
   doc["success"] = true;
-  doc["device"] = DEVICE_NAME;
+  doc["device"] = loadDeviceName();
   doc["firmware"] = FIRMWARE_VERSION;
-  doc["wifi_connected"] = wifiConnected;
-  doc["ip_address"] = WiFi.localIP().toString();
-  doc["rssi"] = WiFi.RSSI();
+  doc["wifi_state"] = getWiFiStateString();
+  doc["wifi_connected"] = (getWiFiState() == WIFI_CONNECTED);
+  
+  if (getWiFiState() == WIFI_CONNECTED) {
+    doc["ip_address"] = WiFi.localIP().toString();
+    doc["rssi"] = WiFi.RSSI();
+    doc["ssid"] = WiFi.SSID();
+  } else if (getWiFiState() == WIFI_AP_MODE) {
+    doc["ap_mode"] = true;
+    doc["ap_ip"] = WiFi.softAPIP().toString();
+    doc["ap_ssid"] = getAPSSID();
+  }
+  
   doc["uptime_seconds"] = (millis() - bootTime) / 1000;
   doc["free_heap"] = ESP.getFreeHeap();
+  
+  // Add statistics
+  uint32_t cam, ngo, thoc;
+  getStats(cam, ngo, thoc);
+  JsonObject stats = doc.createNestedObject("statistics");
+  stats["cam"] = cam;
+  stats["ngo"] = ngo;
+  stats["thoc"] = thoc;
+  stats["total"] = cam + ngo + thoc;
   
   // Add motors status
   doc["motors"] = serialized(getMotorsStatusJSON());

@@ -25,11 +25,11 @@ Nâng cấp ESP32 chicken feeder từ hardcoded WiFi sang hệ thống tự đ�
 
 | Phase | Tasks | Completed | Progress |
 |-------|-------|-----------|----------|
-| Phase 1: Foundation | 3 | 1 | ███░░░░░░░ 33% |
+| Phase 1: Foundation | 3 | 3 | ██████████ 100% |
 | Phase 2: Setup Portal | 2 | 0 | ░░░░░░░░░░ 0% |
 | Phase 3: Admin Panel | 3 | 0 | ░░░░░░░░░░ 0% |
 | Phase 4: Integration | 2 | 0 | ░░░░░░░░░░ 0% |
-| **TOTAL** | **10** | **1** | █░░░░░░░░░ **10%** |
+| **TOTAL** | **10** | **3** | ███░░░░░░░ **30%** |
 
 **Estimated Total Time:** ~17 hours  
 **Actual Time Spent:** In progress...
@@ -41,30 +41,40 @@ Nâng cấp ESP32 chicken feeder từ hardcoded WiFi sang hệ thống tự đ�
 ### Phase 1: Foundation (Tasks 1-3)
 
 #### ✅ Task 1: Project Setup & Configuration
+**Status:** Completed
+
+#### ✅ Task 2: Storage Layer (Preferences)
 **Status:** Completed  
-**Objective:** Tạo cấu trúc project mới và file cấu hình
+**Objective:** Tạo module quản lý lưu trữ persistent data
 
 **Files Created:**
-- ✅ `esp32_wifi_feeder_v2/` folder
-- ✅ `esp32_wifi_feeder_v2/config.h` - All configuration constants
-- ✅ `esp32_wifi_feeder_v2/motor_control.h` - Motor control logic
-- ✅ `esp32_wifi_feeder_v2/esp32_wifi_feeder_v2.ino` - Main file with structure
-- ✅ `docs/` folder for documentation
-- ✅ `README.md` - Project documentation
-- ✅ `.gitignore` - Git ignore rules
+- ✅ `storage.h` - Complete storage management module
+- Functions: WiFi credentials, admin credentials, AP password, statistics, device name
+- SHA256 password hashing
+- Factory reset support
 
-**Demo:** ✅ Code có cấu trúc rõ ràng, ready for next tasks
+**Demo:** ✅ Data persistence working, statistics tracking enabled
 
-#### ☐ Task 2: Storage Layer (Preferences)
-**Status:** Not Started  
+#### ✅ Task 3: WiFi Manager Core Logic
+**Status:** Completed  
+**Objective:** Tạo logic quản lý WiFi connection và AP mode
 
-#### ☐ Task 3: WiFi Manager Core Logic
-**Status:** Not Started
+**Files Created:**
+- ✅ `wifi_manager.h` - Complete WiFi management
+- WiFi state machine (DISCONNECTED/CONNECTING/CONNECTED/AP_MODE)
+- Auto-connect to saved WiFi
+- Fallback to AP mode after 3 failed attempts
+- Auto-reconnect on disconnection
+- WiFi scanning
+- LED indicators
+- Generated AP SSID: ChickenFeeder-XXXX
+
+**Demo:** ✅ WiFi Manager working, AP mode + auto-reconnect enabled
 
 ### Phase 2: Setup Portal (Tasks 4-5)
 
 #### ☐ Task 4: Setup Portal (AP Mode Web Interface)
-**Status:** Not Started
+**Status:** Next
 
 #### ☐ Task 5: Authentication System
 **Status:** Not Started
