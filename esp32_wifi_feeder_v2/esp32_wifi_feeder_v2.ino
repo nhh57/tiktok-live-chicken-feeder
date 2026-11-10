@@ -34,7 +34,7 @@
 #include "config.h"
 #include "storage.h"            // Task 2 - Completed
 #include "wifi_manager.h"       // Task 3 - Completed
-// #include "auth.h"            // Task 5 - Not implemented yet
+#include "auth.h"               // Task 5 - Completed
 #include "web_setup.h"          // Task 4 - Completed
 // #include "web_admin.h"       // Task 6 - Not implemented yet
 #include "motor_control.h"      // Task 1 - Completed
@@ -179,6 +179,12 @@ void setupServerRoutes() {
   // Setup portal routes (for AP mode, but accessible anytime)
   setupSetupPortalRoutes();
   
+  // Task 5 - Setup authentication routes
+  setupAuthRoutes(server);
+  
+  // Admin routes (protected)
+  server.on("/admin", HTTP_GET, handleAdmin);
+  
   // Root route - different behavior based on WiFi state
   server.on("/", HTTP_GET, []() {
     if (getWiFiState() == WIFI_AP_MODE) {
@@ -228,6 +234,7 @@ void handleRoot() {
   html += "<li>POST /feed - Feed control</li>";
   html += "<li>GET /status - Get motor status</li>";
   html += "<li>POST /stop - Emergency stop</li>";
+  html += "<li><a href='/login' style='color: " + String(COLOR_PRIMARY) + "; text-decoration: none; font-weight: bold;'>Admin Panel →</a></li>";
   html += "</ul>";
   html += "<h3>Example POST /feed:</h3>";
   html += "<pre>{\"motor\": \"cam\", \"duration\": 1500}</pre>";
@@ -235,6 +242,33 @@ void handleRoot() {
   html += "</div>";
   html += "<div class='card'>";
   html += "<p><em>⚠️ Development Mode - WiFi Manager and Admin Panel coming soon...</em></p>";
+  html += "</div>";
+  html += "</body></html>";
+  
+  server.send(200, "text/html; charset=UTF-8", html);
+}
+
+/**
+ * Handle GET /admin
+ * Admin dashboard (protected route)
+ */
+void handleAdmin() {
+  if (!requireAuth(server)) return;
+  
+  String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
+  html += "<title>Admin - ChickenFeeder</title>";
+  html += "<style>";
+  html += "body { font-family: Arial; margin: 40px; background: #f5f5f5; }";
+  html += "h1 { color: " + String(COLOR_PRIMARY) + "; }";
+  html += ".card { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }";
+  html += ".logout-btn { background: " + String(COLOR_DANGER) + "; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }";
+  html += "</style>";
+  html += "</head><body>";
+  html += "<h1>🔐 Admin Dashboard</h1>";
+  html += "<div class='card'>";
+  html += "<p><strong>Status:</strong> Logged in successfully!</p>";
+  html += "<p>Admin panel coming soon in Task 6...</p>";
+  html += "<a href='/logout' class='logout-btn'>Logout</a>";
   html += "</div>";
   html += "</body></html>";
   

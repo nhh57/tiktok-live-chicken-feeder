@@ -26,10 +26,10 @@ Nâng cấp ESP32 chicken feeder từ hardcoded WiFi sang hệ thống tự đ�
 | Phase | Tasks | Completed | Progress |
 |-------|-------|-----------|----------|
 | Phase 1: Foundation | 3 | 3 | ██████████ 100% |
-| Phase 2: Setup Portal | 2 | 1 | █████░░░░░ 50% |
+| Phase 2: Setup Portal | 2 | 2 | ██████████ 100% |
 | Phase 3: Admin Panel | 3 | 0 | ░░░░░░░░░░ 0% |
 | Phase 4: Integration | 2 | 0 | ░░░░░░░░░░ 0% |
-| **TOTAL** | **10** | **4** | ████░░░░░░ **40%** |
+| **TOTAL** | **10** | **5** | █████░░░░░ **50%** |
 
 **Estimated Total Time:** ~17 hours  
 **Actual Time Spent:** In progress...
@@ -73,11 +73,22 @@ Nâng cấp ESP32 chicken feeder từ hardcoded WiFi sang hệ thống tự đ�
 
 ### Phase 2: Setup Portal (Tasks 4-5)
 
-#### ☐ Task 4: Setup Portal (AP Mode Web Interface)
-**Status:** Next
+#### ✅ Task 4: Setup Portal (AP Mode Web Interface)
+**Status:** Completed  
+**Files:** `web_setup.h`  
+**Demo:** ✅ WiFi scan + save credentials working
 
-#### ☐ Task 5: Authentication System
-**Status:** Not Started
+#### ✅ Task 5: Authentication System
+**Status:** Completed  
+**Files:** `auth.h`  
+**Features:**
+- Beautiful login page with responsive UI
+- Session management with cookies
+- Protected routes middleware
+- Password verification with SHA256
+- Logout functionality
+- Change password API
+- Session timeout (1 hour default)
 
 ### Phase 3: Admin Panel (Tasks 6-8)
 
