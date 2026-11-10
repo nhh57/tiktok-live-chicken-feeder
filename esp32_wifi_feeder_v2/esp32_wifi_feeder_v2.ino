@@ -63,6 +63,20 @@ void setup() {
   // Task 2 - Initialize storage (Preferences)
   initStorage();
   
+  // ==================== TEMPORARY: Auto-save WiFi for testing ====================
+  // TODO: Remove this after Task 4 (Setup Portal) is completed
+  // This automatically saves WiFi credentials for testing
+  String ssid, password;
+  if (!loadWiFiCredentials(ssid, password)) {
+    DEBUG_PRINTLN(">>> TEMPORARY: Auto-saving WiFi credentials for testing");
+    saveWiFiCredentials("Hoang Hai's iPhone", "Abcd@1234");
+    setSetupDone(true);
+    DEBUG_PRINTLN(">>> WiFi credentials saved. Restarting to connect...");
+    delay(2000);
+    ESP.restart(); // Restart to trigger WiFi connection
+  }
+  // ==================== END TEMPORARY CODE ====================
+  
   // Task 3 - Initialize WiFi Manager
   // This will either connect to saved WiFi or start AP mode
   initWiFiManager();
@@ -116,6 +130,10 @@ void initializeHardware() {
   
   // Initialize motor control
   initializeMotors();
+  
+  // Initialize WiFi to get MAC address
+  WiFi.mode(WIFI_STA);
+  delay(100);
   
   // Get MAC address
   deviceMAC = WiFi.macAddress();
@@ -215,16 +233,16 @@ void handleRoot() {
  * Handle POST /feed
  */
 void handleFeed() {
-  // Check content type
-  if (!server.hasHeader("Content-Type") || 
-      server.header("Content-Type") != "application/json") {
-    sendJSONResponse(400, false, "Content-Type must be application/json");
+  DEBUG_PRINTLN("\n--- New Feed Request ---");
+  
+  // Parse JSON body directly (don't check Content-Type header - ESP32 WebServer doesn't collect it properly)
+  if (!server.hasArg("plain") || server.arg("plain").length() == 0) {
+    sendJSONResponse(400, false, "Missing request body");
     return;
   }
-
-  // Parse JSON
+  
   String body = server.arg("plain");
-  DEBUG_PRINTF("Received: %s\n", body.c_str());
+  DEBUG_PRINTF("Body: %s\n", body.c_str());
 
   StaticJsonDocument<512> doc;
   DeserializationError error = deserializeJson(doc, body);
