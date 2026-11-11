@@ -14,10 +14,19 @@
 #define MANUFACTURER "HoangHai Tech"
 
 // ==================== Pin Definitions ====================
-// Motor control pins (Active LOW relays)
-#define RELAY_CAM   25  // GPIO 25 - Relay for Cám (corn feed)
-#define RELAY_NGO   26  // GPIO 26 - Relay for Ngô (corn)
-#define RELAY_THOC  27  // GPIO 27 - Relay for Thóc (rice)
+// DRV8833 H-Bridge Motor Driver pins
+// Motor 1 (Cám - Corn feed)
+#define MOTOR1_IN1  18  // GPIO 18 (D18) - Motor 1 input A
+#define MOTOR1_IN2  19  // GPIO 19 (D19) - Motor 1 input B
+
+// Motor 2 (Ngô - Corn)
+#define MOTOR2_IN3  16  // GPIO 16 (D16) - Motor 2 input A
+#define MOTOR2_IN4  17  // GPIO 17 (D17) - Motor 2 input B
+
+// Aliases for compatibility with existing code
+#define RELAY_CAM   MOTOR1_IN1
+#define RELAY_NGO   MOTOR2_IN3
+// Motor 3 (THOC) not used with 2-motor DRV8833 setup
 
 // Status LED pin
 #define LED_STATUS  2   // GPIO 2 - Built-in LED (Active HIGH)
@@ -72,7 +81,7 @@
 #define KEY_AP_PASS "ap_pass"
 #define KEY_CAM_COUNT "cam_count"
 #define KEY_NGO_COUNT "ngo_count"
-#define KEY_THOC_COUNT "thoc_count"
+// KEY_THOC_COUNT removed - only 2 motors with DRV8833
 #define KEY_SETUP_DONE "setup_done"
 #define KEY_DEVICE_NAME "device_name"
 

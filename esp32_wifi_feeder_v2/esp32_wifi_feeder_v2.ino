@@ -64,6 +64,9 @@ void setup() {
   // Task 2 - Initialize storage (Preferences)
   initStorage();
   
+  // ⚠️ UNCOMMENT DÒNG DƯỚI ĐỂ RESET TOÀN BỘ (WiFi + Stats) - Chỉ dùng 1 lần!
+  // clearAllData(); delay(1000); ESP.restart();  // ← ĐÃ COMMENT LẠI
+  
   // Task 3 - Initialize WiFi Manager
   // This will either connect to saved WiFi or start AP mode
   initWiFiManager();
@@ -235,7 +238,7 @@ void handleRoot() {
   html += "</ul>";
   html += "<h3>Example POST /feed:</h3>";
   html += "<pre>{\"motor\": \"cam\", \"duration\": 1500}</pre>";
-  html += "<pre>{\"motors\": [\"cam\", \"ngo\", \"thoc\"], \"duration\": 2000}</pre>";
+  html += "<pre>{\"motors\": [\"cam\", \"ngo\"], \"duration\": 2000}</pre>";
   html += "</div>";
   html += "<div class='card'>";
   html += "<p><em>⚠️ Development Mode - WiFi Manager and Admin Panel coming soon...</em></p>";
@@ -282,7 +285,7 @@ void handleFeed() {
       
       sendJSONResponse(200, true, "Motor " + motorName + " activated for " + String(duration) + "ms");
     } else {
-      sendJSONResponse(400, false, "Invalid motor name. Use: cam, ngo, or thoc");
+      sendJSONResponse(400, false, "Invalid motor name. Use: cam or ngo");
     }
     return;
   }
@@ -341,14 +344,13 @@ void handleStatus() {
   doc["uptime_seconds"] = (millis() - bootTime) / 1000;
   doc["free_heap"] = ESP.getFreeHeap();
   
-  // Add statistics
-  uint32_t cam, ngo, thoc;
-  getStats(cam, ngo, thoc);
+  // Add statistics - only 2 motors
+  uint32_t cam, ngo;
+  getStats(cam, ngo);
   JsonObject stats = doc.createNestedObject("statistics");
   stats["cam"] = cam;
   stats["ngo"] = ngo;
-  stats["thoc"] = thoc;
-  stats["total"] = cam + ngo + thoc;
+  stats["total"] = cam + ngo;
   
   // Add motors status
   doc["motors"] = serialized(getMotorsStatusJSON());

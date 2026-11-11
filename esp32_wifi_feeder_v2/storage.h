@@ -70,7 +70,7 @@ void initStorage() {
     // Initialize statistics to 0
     preferences.putUInt(KEY_CAM_COUNT, 0);
     preferences.putUInt(KEY_NGO_COUNT, 0);
-    preferences.putUInt(KEY_THOC_COUNT, 0);
+    // THOC count removed - only 2 motors with DRV8833
     
     // Set default device name
     saveDeviceName(DEVICE_NAME);
@@ -225,7 +225,7 @@ String loadAPPassword() {
 /**
  * Update feed statistics
  * Increments counter for specified motor
- * @param motor Motor name ("cam", "ngo", or "thoc")
+ * @param motor Motor name ("cam" or "ngo")
  */
 void updateStats(String motor) {
   motor.toLowerCase();
@@ -238,25 +238,20 @@ void updateStats(String motor) {
     uint32_t count = preferences.getUInt(KEY_NGO_COUNT, 0);
     preferences.putUInt(KEY_NGO_COUNT, count + 1);
     DEBUG_PRINTF("Stats updated: ngo=%d\n", count + 1);
-  } else if (motor == "thoc") {
-    uint32_t count = preferences.getUInt(KEY_THOC_COUNT, 0);
-    preferences.putUInt(KEY_THOC_COUNT, count + 1);
-    DEBUG_PRINTF("Stats updated: thoc=%d\n", count + 1);
   }
+  // "thoc" case removed - only 2 motors with DRV8833
 }
 
 /**
  * Get feed statistics
  * @param cam Output cam count
  * @param ngo Output ngo count
- * @param thoc Output thoc count
  */
-void getStats(uint32_t &cam, uint32_t &ngo, uint32_t &thoc) {
+void getStats(uint32_t &cam, uint32_t &ngo) {
   cam = preferences.getUInt(KEY_CAM_COUNT, 0);
   ngo = preferences.getUInt(KEY_NGO_COUNT, 0);
-  thoc = preferences.getUInt(KEY_THOC_COUNT, 0);
   
-  DEBUG_PRINTF("Stats retrieved: cam=%d, ngo=%d, thoc=%d\n", cam, ngo, thoc);
+  DEBUG_PRINTF("Stats retrieved: cam=%d, ngo=%d\n", cam, ngo);
 }
 
 /**

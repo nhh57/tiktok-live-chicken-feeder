@@ -10,7 +10,7 @@ app = Flask(__name__)
 # ============================================
 # KẾT NỐI ESP32 QUA WiFi
 # ============================================
-ESP32_IP = "172.20.10.2"  # IP của ESP32
+ESP32_IP = "10.10.4.187"  # IP của ESP32 (đã cập nhật)
 ESP32_URL = f"http://{ESP32_IP}/feed"
 
 esp32_connected = False

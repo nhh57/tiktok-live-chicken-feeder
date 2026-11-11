@@ -166,7 +166,6 @@ void handleAdminDashboard(WebServer &server) {
     
     .btn-cam { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .btn-ngo { background: linear-gradient(135deg, #10b981, #059669); }
-    .btn-thoc { background: linear-gradient(135deg, #3b82f6, #2563eb); }
     .btn-stop { background: linear-gradient(135deg, #ef4444, #dc2626); }
     
     .info-table {
@@ -334,8 +333,8 @@ void handleAdminDashboard(WebServer &server) {
         <div class="stat-icon">🌾</div>
         <div class="stat-value" id="stat-cam">)rawliteral";
   
-  uint32_t cam, ngo, thoc;
-  getStats(cam, ngo, thoc);
+  uint32_t cam, ngo;
+  getStats(cam, ngo);
   html += String(cam);
   
   html += R"rawliteral(</div>
@@ -347,13 +346,8 @@ void handleAdminDashboard(WebServer &server) {
         <div class="stat-label">Ngô</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">🌾</div>
-        <div class="stat-value" id="stat-thoc">)rawliteral" + String(thoc) + R"rawliteral(</div>
-        <div class="stat-label">Thóc</div>
-      </div>
-      <div class="stat-card">
         <div class="stat-icon">📊</div>
-        <div class="stat-value" id="stat-total">)rawliteral" + String(cam + ngo + thoc) + R"rawliteral(</div>
+        <div class="stat-value" id="stat-total">)rawliteral" + String(cam + ngo) + R"rawliteral(</div>
         <div class="stat-label">Tổng cộng</div>
       </div>
     </div>
@@ -367,9 +361,6 @@ void handleAdminDashboard(WebServer &server) {
         </button>
         <button class="motor-btn btn-ngo" onclick="feedMotor('ngo')">
           🌽 Cho ăn Ngô
-        </button>
-        <button class="motor-btn btn-thoc" onclick="feedMotor('thoc')">
-          🌾 Cho ăn Thóc
         </button>
         <button class="motor-btn btn-stop" onclick="stopAll()">
           🛑 Dừng tất cả
@@ -539,7 +530,6 @@ void handleAdminDashboard(WebServer &server) {
         if (data.success) {
           document.getElementById('stat-cam').textContent = data.statistics.cam;
           document.getElementById('stat-ngo').textContent = data.statistics.ngo;
-          document.getElementById('stat-thoc').textContent = data.statistics.thoc;
           document.getElementById('stat-total').textContent = data.statistics.total;
           document.getElementById('uptime').textContent = data.uptime_seconds + ' giây';
           document.getElementById('free-memory').textContent = data.free_heap + ' bytes';
@@ -610,7 +600,7 @@ void handleResetStats(WebServer &server) {
   
   preferences.putUInt(KEY_CAM_COUNT, 0);
   preferences.putUInt(KEY_NGO_COUNT, 0);
-  preferences.putUInt(KEY_THOC_COUNT, 0);
+  // THOC_COUNT removed - only 2 motors
   
   DEBUG_PRINTLN("Statistics reset to 0");
   
